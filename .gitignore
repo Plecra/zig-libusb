@@ -24,10 +24,6 @@ aclocal.m4
 compile
 test-driver
 config.guess
-config.h*
-!msvc/config.h
-!android/config.h
-!Xcode/config.h
 .vs
 config.log
 config.status
@@ -82,3 +78,5 @@ xcuserdata
 build/
 tags
 cscope.out
+zig-cache
+zig-out
