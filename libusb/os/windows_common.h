@@ -232,12 +232,19 @@ typedef struct USB_DK_TRANSFER_REQUEST {
 	USB_DK_TRANSFER_RESULT Result;
 } USB_DK_TRANSFER_REQUEST, *PUSB_DK_TRANSFER_REQUEST;
 
+enum discovery_status {
+	NO_LONGER_DISCOVERED,
+	STILL_DISCOVERED,
+	NEWLY_DISCOVERED	
+};
+
 struct usbdk_device_priv {
 	USB_DK_DEVICE_ID ID;
 	PUSB_CONFIGURATION_DESCRIPTOR *config_descriptors;
 	HANDLE redirector_handle;
 	HANDLE system_handle;
 	uint8_t active_configuration;
+	enum discovery_status discovery_status;
 };
 
 struct winusb_device_priv {
@@ -269,6 +276,7 @@ struct winusb_device_priv {
 	struct hid_device_priv *hid;
 	PUSB_CONFIGURATION_DESCRIPTOR *config_descriptor; // list of pointers to the cached config descriptors
 	GUID class_guid; // checked for change during re-enumeration
+	enum discovery_status discovery_status;
 };
 
 struct usbdk_device_handle_priv {
@@ -318,8 +326,7 @@ struct winusb_transfer_priv {
 struct windows_backend {
 	int (*init)(struct libusb_context *ctx);
 	void (*exit)(struct libusb_context *ctx);
-	int (*get_device_list)(struct libusb_context *ctx,
-		struct discovered_devs **discdevs);
+	int (*get_device_list)(struct libusb_context *ctx);
 	int (*open)(struct libusb_device_handle *dev_handle);
 	void (*close)(struct libusb_device_handle *dev_handle);
 	int (*get_active_config_descriptor)(struct libusb_device *device,
