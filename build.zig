@@ -22,6 +22,28 @@ pub fn build(b: *Build) void {
         const lib = create_libusb(b, t, optimize);
         build_all.dependOn(&lib.step);
     }
+    const testlibusb = b.addExecutable(.{
+        .name = "testlibusb",
+        .root_source_file = .{ .path = "./examples/testlibusb.zig" },
+        .optimize = optimize,
+        .target = target,
+    });
+    testlibusb.linkLibC();
+    testlibusb.linkLibrary(libusb);
+    _ = b.step("testlibusb", "build testlibusb.zig example").dependOn(&b.addInstallArtifact(testlibusb, .{}).step);
+    const hotplugtest = b.addExecutable(.{
+        .name = "hotplugtest",
+        // .root_source_file = .{ .path = "./examples/hotplugtest.c" },
+        .optimize = optimize,
+        .target = target,
+    });
+    hotplugtest.addCSourceFile(.{
+        .file = .{ .path = "./examples/hotplugtest.c" },
+        .flags = &.{},
+    });
+    hotplugtest.linkLibC();
+    hotplugtest.linkLibrary(libusb);
+    _ = b.step("hotplugtest", "build hotplugtest.c example").dependOn(&b.addInstallArtifact(hotplugtest, .{}).step);
 }
 
 fn create_libusb(
