@@ -43,6 +43,7 @@ pub fn build(b: *Build) void {
     });
     hotplugtest.linkLibC();
     hotplugtest.linkLibrary(libusb);
+    addConfig(b, hotplugtest, target, optimize);
     _ = b.step("hotplugtest", "build hotplugtest.c example").dependOn(&b.addInstallArtifact(hotplugtest, .{}).step);
 }
 
@@ -89,6 +90,16 @@ fn create_libusb(
     lib.addIncludePath(.{ .path = "libusb" });
     lib.installHeader("libusb/libusb.h", "libusb.h");
 
+    addConfig(b, lib, target, optimize);
+
+    return lib;
+}
+fn addConfig(b: *Build, lib: *Build.CompileStep, target: std.zig.CrossTarget, optimize: std.builtin.OptimizeMode) void {
+    const is_posix =
+        target.isDarwin() or
+        target.isLinux() or
+        target.isOpenBSD();
+    
     // config header
     if (target.isDarwin()) {
         lib.addIncludePath(.{ .path = "Xcode" });
@@ -151,8 +162,6 @@ fn create_libusb(
         });
         lib.addConfigHeader(config_h);
     }
-
-    return lib;
 }
 
 const src = &.{
@@ -211,6 +220,7 @@ const windows_src: []const []const u8 = &.{
     "libusb/os/events_windows.c",
     "libusb/os/threads_windows.c",
     "libusb/os/windows_common.c",
+    "libusb/os/windows_hotplug.c",
     "libusb/os/windows_usbdk.c",
     "libusb/os/windows_winusb.c",
 };
